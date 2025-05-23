@@ -25,13 +25,12 @@ const MapPage = () => {
           {unit === 'metric' ? 'Switch to °F' : 'Switch to °C'}
         </button>
       </div>
-
-     <div className="p-2">
+      
       <MapContainer
         center={position}
         zoom={3}
         scrollWheelZoom={true}
-        className="h-full w-full"
+        className="h-full w-full z-10"
       >
         <TileLayer
           attribution='&copy; OpenStreetMap contributors'
@@ -54,7 +53,6 @@ const MapPage = () => {
           </Popup>
         </Marker>
       </MapContainer>
-     </div>
     </div>
   );
 };

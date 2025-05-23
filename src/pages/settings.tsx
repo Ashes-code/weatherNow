@@ -1,42 +1,67 @@
 import { useState, useEffect } from 'react';
+import { useSettingsStore } from '../components/useSettings';
+import { toast } from 'sonner';
 
 const SettingsPage = () => {
-  const [unit, setUnit] = useState<'C' | 'F'>('C');
+  const { unit, city, setUnit, setCity } = useSettingsStore();
+  const [localUnit, setLocalUnit] = useState<'C' | 'F'>(unit);
+  const [localCity, setLocalCity] = useState(city);
   const [notifications, setNotifications] = useState(true);
-  const [defaultCity, setDefaultCity] = useState('New York');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [recentCities, setRecentCities] = useState<string[]>([]);
 
   useEffect(() => {
-    // Load settings from localStorage if available
-    const savedUnit = localStorage.getItem('unit') as 'C' | 'F';
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    const savedCity = localStorage.getItem('city');
     const savedNotify = localStorage.getItem('notifications');
+    if (savedNotify) setNotifications(savedNotify === 'true');
 
-    if (savedUnit) setUnit(savedUnit);
-    if (savedTheme) setTheme(savedTheme);
-    if (savedCity) setDefaultCity(savedCity);
+    const recent = JSON.parse(localStorage.getItem('recentCities') || '[]');
+    setRecentCities(recent);
+  }, []);
+
+
+  useEffect(() => {
+    const savedNotify = localStorage.getItem('notifications');
     if (savedNotify) setNotifications(savedNotify === 'true');
   }, []);
 
   const handleSave = () => {
-    localStorage.setItem('unit', unit);
-    localStorage.setItem('theme', theme);
-    localStorage.setItem('city', defaultCity);
+    setUnit(localUnit);
+    setCity(localCity);
     localStorage.setItem('notifications', notifications.toString());
-    alert('Settings saved!');
+
+    // Update recent cities
+    let updatedRecent = [localCity, ...recentCities.filter(c => c !== localCity)];
+    updatedRecent = updatedRecent.slice(0, 3); // Keep only 3
+    localStorage.setItem('recentCities', JSON.stringify(updatedRecent));
+    setRecentCities(updatedRecent);
+
+    toast.success('Settings saved!');
   };
+
+  const handleReset = () => {
+    const defaultCity = 'New York';
+    setLocalCity(defaultCity);
+    setLocalUnit('C');
+    setNotifications(true);
+    setUnit('C');
+    setCity(defaultCity);
+    localStorage.removeItem('recentCities');
+    localStorage.setItem('notifications', 'true');
+    toast.success('Settings reset to defaults!');
+    setRecentCities([]);
+  };
+
+
 
   return (
     <div className="px-4">
-      <h2 className="text-2xl font-bold mb-6 text-indigo-700">Settings</h2>
+      <h2 className="text-3xl font-bold mb-4 text-indigo-700 text-center">Settings</h2>
       <div className="bg-white p-6 rounded-lg shadow space-y-6">
-        {/* Unit Toggle */}
+        {/* Temperature Unit */}
         <div>
           <label className="block font-semibold mb-2">Temperature Unit</label>
           <select
-            value={unit}
-            onChange={(e) => setUnit(e.target.value as 'C' | 'F')}
+            value={localUnit}
+            onChange={(e) => setLocalUnit(e.target.value as 'C' | 'F')}
             className="w-full p-2 border rounded"
           >
             <option value="C">Celsius (°C)</option>
@@ -44,7 +69,7 @@ const SettingsPage = () => {
           </select>
         </div>
 
-        {/* Notification Toggle */}
+        {/* Notifications */}
         <div className="flex items-center justify-between">
           <label className="font-semibold">Enable Notifications</label>
           <input
@@ -60,33 +85,47 @@ const SettingsPage = () => {
           <label className="block font-semibold mb-2">Default City</label>
           <input
             type="text"
-            value={defaultCity}
-            onChange={(e) => setDefaultCity(e.target.value)}
+            value={localCity}
+            onChange={(e) => setLocalCity(e.target.value)}
             className="w-full p-2 border rounded"
             placeholder="Enter your default city"
           />
         </div>
 
-        {/* Theme Toggle */}
-        <div>
-          <label className="block font-semibold mb-2">Theme</label>
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value as 'light' | 'dark')}
-            className="w-full p-2 border rounded"
+        {/* Recent Cities Dropdown */}
+        {recentCities.length > 0 && (
+          <div>
+            <label className="block font-semibold mb-2">Recent Cities</label>
+            <select
+              onChange={(e) => setLocalCity(e.target.value)}
+              className="w-full p-2 border rounded"
+              value=""
+            >
+              <option value="" disabled>Select from recent</option>
+              {recentCities.map((city, index) => (
+                <option key={index} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+
+        {/* Save and Reset Buttons */}
+        <div className="flex gap-4">
+          <button
+            onClick={handleSave}
+            className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-500"
           >
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
+            Save Settings
+          </button>
+          <button
+            onClick={handleReset}
+            className="bg-gray-700 text-white px-6 py-2 rounded hover:bg-gray-900"
+          >
+            Reset to Defaults
+          </button>
         </div>
 
-        {/* Save Button */}
-        <button
-          onClick={handleSave}
-          className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-500"
-        >
-          Save Settings
-        </button>
       </div>
     </div>
   );

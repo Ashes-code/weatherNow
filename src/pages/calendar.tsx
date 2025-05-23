@@ -1,9 +1,9 @@
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import format from 'date-fns/format';
-import parse from 'date-fns/parse';
-import startOfWeek from 'date-fns/startOfWeek';
-import getDay from 'date-fns/getDay';
-import enUS from 'date-fns/locale/en-US'; // Locale support
+import {format} from 'date-fns/format';
+import {parse} from 'date-fns/parse';
+import {startOfWeek} from 'date-fns/startOfWeek';
+import {getDay} from 'date-fns/getDay';
+import {enUS} from 'date-fns/locale/en-US'; // Locale support
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const locales = {
@@ -34,8 +34,8 @@ const events = [
 
 const CalendarPage = () => {
   return (
-    <div className="p-4 h-full bg-gray-50 rounded-r-lg overflow-auto">
-      <h2 className="text-2xl font-bold mb-4 text-indigo-700">Weather Calendar</h2>
+    <div className="lg:p-4 h-full bg-gray-50 rounded-r-lg overflow-auto">
+      <h2 className="text-2xl font-bold text-indigo-700 flex items-center justify-center my-4">Weather Calendar</h2>
       <div className="bg-white rounded shadow p-4 h-full flex flex-col">
         <Calendar
           localizer={localizer}
