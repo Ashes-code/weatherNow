@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   LineChart,
   Line,
@@ -10,6 +10,8 @@ import {
 } from "recharts";
 import axios from "axios";
 import "../App.css";
+import { useMemo } from "react";
+
 
 // Interfaces
 interface WeatherData {
@@ -29,10 +31,13 @@ interface ForecastItem {
 const Dashboard = () => {
   const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
-  const cities = [
-    "Abia", "Rivers", "Lagos", "Abuja", "London", "New York", "Cairo",
-    "Paris", "Nairobi", "Berlin", "Beijing", "Johannesburg", "Dubai", "Toronto",
-  ];
+  const cities = useMemo(
+    () => [
+      "Abia", "Rivers", "Lagos", "Abuja", "London", "New York", "Cairo",
+      "Paris", "Nairobi", "Berlin", "Beijing", "Johannesburg", "Dubai", "Toronto",
+    ],
+    []
+  );
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -47,7 +52,7 @@ const Dashboard = () => {
   const [isLoadingWeather, setIsLoadingWeather] = useState(true);
   const [isLoadingForecast, setIsLoadingForecast] = useState(true);
 
-  const fetchWeather = async (city: string) => {
+  const fetchWeather = useCallback(async (city: string) => {
     try {
       const res = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${API_KEY}&units=metric`
@@ -57,9 +62,9 @@ const Dashboard = () => {
       console.error("Error fetching weather for:", city, error);
       return null;
     }
-  };
+  }, [API_KEY]);
 
-  const fetchForecast = async (city: string) => {
+  const fetchForecast = useCallback(async (city: string) => {
     try {
       const res = await axios.get(
         `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
@@ -69,7 +74,7 @@ const Dashboard = () => {
       console.error("Error fetching forecast for:", city, error);
       return [];
     }
-  };
+  }, [API_KEY]);
 
   useEffect(() => {
     const loadWeatherData = async () => {
@@ -80,7 +85,7 @@ const Dashboard = () => {
       setIsLoadingWeather(false);
     };
     loadWeatherData();
-  }, []);
+  }, [cities, fetchWeather]);
 
   useEffect(() => {
     const loadStripData = async () => {
@@ -90,7 +95,7 @@ const Dashboard = () => {
       setIsLoadingForecast(false);
     };
     loadStripData();
-  }, [selectedForecastCity]);
+  }, [selectedForecastCity, fetchForecast]);
 
   useEffect(() => {
     const loadGraphData = async () => {
@@ -98,7 +103,8 @@ const Dashboard = () => {
       setForecastGraphData(forecast);
     };
     loadGraphData();
-  }, [selectedCity]);
+  }, [selectedCity, fetchForecast]);
+
 
   return (
     <div className="m-2 lg:m-0 bg-white rounded-lg p-3 overflow-hidden shadow h-full md:max-w-[97vw] lg:max-w-auto py-5">

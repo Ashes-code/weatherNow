@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   LineChart,
   Line,
@@ -59,7 +59,7 @@ const Statistics = () => {
     return Object.keys(count).reduce((a, b) => (count[a] > count[b] ? a : b));
   };
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${selectedCity.lat}&lon=${selectedCity.lon}&units=${unit}&appid=${API_KEY}`;
     const res = await fetch(url);
     const data = await res.json();
@@ -102,11 +102,11 @@ const Statistics = () => {
     });
 
     setWeatherDistribution(Object.entries(dist).map(([name, value]) => ({ name, value })));
-  };
+  }, [selectedCity, unit]);
 
   useEffect(() => {
     fetchWeather();
-  }, [selectedCity, unit]);
+  }, [fetchWeather]);
 
   return (
     <div className="p-3 space-y-8 h-full overflow-y-auto">
@@ -196,10 +196,7 @@ const Statistics = () => {
               label
             >
               {weatherDistribution.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />
