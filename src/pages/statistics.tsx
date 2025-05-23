@@ -195,7 +195,7 @@ const Statistics = () => {
               dataKey="value"
               label
             >
-              {weatherDistribution.map((entry, index) => (
+              {weatherDistribution.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
