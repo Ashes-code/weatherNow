@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { useState } from 'react';
-import L from 'leaflet';
+import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const MapPage = () => {
@@ -10,7 +10,7 @@ const MapPage = () => {
     setUnit(prev => (prev === 'metric' ? 'imperial' : 'metric'));
   };
 
-  const position: [number, number] = [40.7128, -74.006]; // New York
+  const position: LatLngExpression = [40.7128, -74.006];
 
   const openWeatherTileUrl = `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`;
 
@@ -25,7 +25,7 @@ const MapPage = () => {
           {unit === 'metric' ? 'Switch to °F' : 'Switch to °C'}
         </button>
       </div>
-      
+
       <MapContainer
         center={position}
         zoom={3}
